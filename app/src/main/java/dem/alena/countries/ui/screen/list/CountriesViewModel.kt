@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import dem.alena.countries.data.model.Country
 import dem.alena.countries.data.repository.CountriesRepository
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 class CountriesViewModel : ViewModel() {
 
@@ -59,6 +60,15 @@ class CountriesViewModel : ViewModel() {
                     CountriesUiState.Empty
                 } else {
                     CountriesUiState.Success(result)
+                }
+            } catch (e: HttpException) {
+                e.printStackTrace()
+                uiState = if (e.code() == 404) {
+                    CountriesUiState.Empty
+                } else {
+                    CountriesUiState.Error(
+                        "Не удалось загрузить страны: ${e.javaClass.simpleName} ${e.message ?: ""}"
+                    )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
