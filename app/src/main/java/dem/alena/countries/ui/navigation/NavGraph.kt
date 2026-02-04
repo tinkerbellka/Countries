@@ -5,17 +5,21 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import dem.alena.countries.data.repository.CountriesRepository
 import dem.alena.countries.ui.screen.detail.CountryDetailScreen
 import dem.alena.countries.ui.screen.detail.CountryDetailViewModel
 import dem.alena.countries.ui.screen.list.CountriesListScreen
 import dem.alena.countries.ui.screen.list.CountriesViewModel
+import dem.alena.countries.ui.screen.list.CountriesViewModelFactory
 import dem.alena.countries.ui.screen.list.FavouritesScreen
 
 @Composable
 fun NavGraph(
     navController: NavHostController
 ) {
-    val countriesViewModel: CountriesViewModel = viewModel()
+    val countriesViewModel: CountriesViewModel = viewModel(
+        factory = CountriesViewModelFactory(CountriesRepository())
+    )
 
     NavHost(
         navController = navController,
@@ -36,7 +40,8 @@ fun NavGraph(
 
         composable("favourites") {
             FavouritesScreen(
-                viewModel = countriesViewModel,
+                state = countriesViewModel.favouritesState,
+                onEvent = countriesViewModel::onFavouritesEvent,
                 onCountryClick = { code ->
                     navController.navigate("detail/$code")
                 }

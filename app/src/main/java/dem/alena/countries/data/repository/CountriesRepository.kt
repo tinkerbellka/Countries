@@ -19,4 +19,14 @@ class CountriesRepository {
     suspend fun getCountryByCode(code: String): Country {
         return api.getCountryByCode(code)
     }
+
+    suspend fun getCountriesByCodes(codes: List<String>): List<Country> {
+        return codes.mapNotNull { code ->
+            try {
+                api.getCountryByCode(code)
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
 }

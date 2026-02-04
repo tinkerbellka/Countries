@@ -1,5 +1,6 @@
 package dem.alena.countries.ui.screen.list
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,11 +11,18 @@ import dem.alena.countries.data.repository.CountriesRepository
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class CountriesViewModel : ViewModel() {
+class CountriesViewModel(
+    private val repository: CountriesRepository
+) : ViewModel() {
 
-    private val repository = CountriesRepository()
+    companion object {
+        private const val TAG = "CountriesViewModel"
+    }
 
     var uiState by mutableStateOf<CountriesUiState>(CountriesUiState.Loading)
+        private set
+
+    var favouritesState by mutableStateOf<FavouritesUiState>(FavouritesUiState.Empty)
         private set
 
     private var favourites by mutableStateOf<Set<String>>(emptySet())
@@ -36,7 +44,7 @@ class CountriesViewModel : ViewModel() {
                     CountriesUiState.Success(result)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Не удалось загрузить список стран", e)
                 uiState = CountriesUiState.Error(
                     "Не удалось загрузить список стран: ${e.javaClass.simpleName} ${e.message ?: ""}"
                 )
@@ -62,7 +70,7 @@ class CountriesViewModel : ViewModel() {
                     CountriesUiState.Success(result)
                 }
             } catch (e: HttpException) {
-                e.printStackTrace()
+                Log.e(TAG, "Поиск стран: HttpException", e)
                 uiState = if (e.code() == 404) {
                     CountriesUiState.Empty
                 } else {
@@ -71,7 +79,7 @@ class CountriesViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Поиск стран: ошибка", e)
                 uiState = CountriesUiState.Error(
                     "Не удалось загрузить страны: ${e.javaClass.simpleName} ${e.message ?: ""}"
                 )
@@ -90,4 +98,44 @@ class CountriesViewModel : ViewModel() {
     fun isFavourite(code: String): Boolean {
         return favourites.contains(code)
     }
+
+    fun onFavouritesEvent(event: FavouritesEvent) {
+        when (event) {
+            FavouritesEvent.Load -> loadFavourites()
+        }
+    }
+
+    private fun loadFavourites() {
+        if (favourites.isEmpty()) {
+            favouritesState = FavouritesUiState.Empty
+            return
+        }
+        favouritesState = FavouritesUiState.Loading
+        viewModelScope.launch {
+            try {
+                val result = repository.getCountriesByCodes(favourites.toList())
+                favouritesState = if (result.isEmpty()) {
+                    FavouritesUiState.Empty
+                } else {
+                    FavouritesUiState.Success(result)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Не удалось загрузить избранное", e)
+                favouritesState = FavouritesUiState.Error(
+                    "Не удалось загрузить избранное: ${e.message ?: ""}"
+                )
+            }
+        }
+    }
+}
+
+sealed class FavouritesUiState {
+    data object Empty : FavouritesUiState()
+    data object Loading : FavouritesUiState()
+    data class Success(val countries: List<Country>) : FavouritesUiState()
+    data class Error(val message: String) : FavouritesUiState()
+}
+
+sealed interface FavouritesEvent {
+    data object Load : FavouritesEvent
 }
