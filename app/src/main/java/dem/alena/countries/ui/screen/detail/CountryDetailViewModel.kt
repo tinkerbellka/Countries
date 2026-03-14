@@ -5,13 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dem.alena.countries.data.model.Country
 import dem.alena.countries.data.repository.CountriesRepository
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CountryDetailViewModel : ViewModel() {
-
-    private val repository = CountriesRepository()
+@HiltViewModel
+class CountryDetailViewModel @Inject constructor(
+    private val repository: CountriesRepository
+) : ViewModel() {
 
     var country by mutableStateOf<Country?>(null)
         private set

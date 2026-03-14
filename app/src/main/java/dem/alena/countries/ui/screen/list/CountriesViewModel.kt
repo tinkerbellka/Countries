@@ -6,12 +6,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dem.alena.countries.data.model.Country
 import dem.alena.countries.data.repository.CountriesRepository
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import javax.inject.Inject
 
-class CountriesViewModel(
+@HiltViewModel
+class CountriesViewModel @Inject constructor(
     private val repository: CountriesRepository
 ) : ViewModel() {
 
@@ -30,6 +33,7 @@ class CountriesViewModel(
 
     init {
         loadAllCountries()
+        loadFavouriteCodes()
     }
 
     private fun loadAllCountries() {
@@ -88,15 +92,30 @@ class CountriesViewModel(
     }
 
     fun toggleFavourite(country: Country) {
-        favourites = if (favourites.contains(country.code)) {
-            favourites - country.code
-        } else {
-            favourites + country.code
+        viewModelScope.launch {
+            val isCurrentlyFavourite = repository.isFavourite(country.code)
+            if (isCurrentlyFavourite) {
+                repository.removeFavourite(country.code)
+                favourites = favourites - country.code
+            } else {
+                repository.addFavourite(country.code)
+                favourites = favourites + country.code
+            }
         }
     }
 
     fun isFavourite(code: String): Boolean {
         return favourites.contains(code)
+    }
+
+    private fun loadFavouriteCodes() {
+        viewModelScope.launch {
+            try {
+                favourites = repository.getFavouriteCodes()
+            } catch (e: Exception) {
+                Log.e(TAG, "Не удалось загрузить избранное из БД", e)
+            }
+        }
     }
 
     fun onFavouritesEvent(event: FavouritesEvent) {

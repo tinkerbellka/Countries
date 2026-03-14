@@ -3,10 +3,12 @@ package dem.alena.countries
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.navigation.compose.rememberNavController
 import dem.alena.countries.ui.navigation.NavGraph
 import dem.alena.countries.ui.theme.CountriesTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
