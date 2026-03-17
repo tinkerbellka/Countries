@@ -5,6 +5,11 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "favourites")
 data class FavouriteCountryEntity(
-    @PrimaryKey val code: String
+    @PrimaryKey val code: String,
+    val nameCommon: String,
+    val region: String,
+    val population: Long,
+    val capital: String?,
+    val flagPng: String
 )
 

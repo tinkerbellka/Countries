@@ -98,7 +98,7 @@ class CountriesViewModel @Inject constructor(
                 repository.removeFavourite(country.code)
                 favourites = favourites - country.code
             } else {
-                repository.addFavourite(country.code)
+                repository.addFavourite(country)
                 favourites = favourites + country.code
             }
         }
@@ -125,14 +125,10 @@ class CountriesViewModel @Inject constructor(
     }
 
     private fun loadFavourites() {
-        if (favourites.isEmpty()) {
-            favouritesState = FavouritesUiState.Empty
-            return
-        }
         favouritesState = FavouritesUiState.Loading
         viewModelScope.launch {
             try {
-                val result = repository.getCountriesByCodes(favourites.toList())
+                val result = repository.getFavouriteCountries()
                 favouritesState = if (result.isEmpty()) {
                     FavouritesUiState.Empty
                 } else {

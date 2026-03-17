@@ -3,6 +3,8 @@ package dem.alena.countries.data.repository
 import dem.alena.countries.data.local.FavouriteCountryEntity
 import dem.alena.countries.data.local.FavouritesDao
 import dem.alena.countries.data.model.Country
+import dem.alena.countries.data.model.Flags
+import dem.alena.countries.data.model.Name
 import dem.alena.countries.data.network.CountriesApi
 import javax.inject.Inject
 
@@ -23,30 +25,41 @@ class CountriesRepository @Inject constructor(
         return api.getCountryByCode(code)
     }
 
-    suspend fun getCountriesByCodes(codes: List<String>): List<Country> {
-        return codes.mapNotNull { code ->
-            try {
-                api.getCountryByCode(code)
-            } catch (_: Exception) {
-                null
-            }
-        }
-    }
-
-    //избранные с Room
     suspend fun getFavouriteCodes(): Set<String> {
         return favouritesDao.getAllCodes().toSet()
+    }
+
+    suspend fun getFavouriteCountries(): List<Country> {
+        return favouritesDao.getAll().map { entity ->
+            Country(
+                code = entity.code,
+                name = Name(common = entity.nameCommon),
+                capital = entity.capital?.let { listOf(it) },
+                region = entity.region,
+                population = entity.population,
+                flags = Flags(png = entity.flagPng)
+            )
+        }
     }
 
     suspend fun isFavourite(code: String): Boolean {
         return favouritesDao.isFavourite(code)
     }
 
-    suspend fun addFavourite(code: String) {
-        favouritesDao.insert(FavouriteCountryEntity(code))
+    suspend fun addFavourite(country: Country) {
+        favouritesDao.insert(
+            FavouriteCountryEntity(
+                code = country.code,
+                nameCommon = country.name.common,
+                region = country.region,
+                population = country.population,
+                capital = country.capital?.firstOrNull(),
+                flagPng = country.flags.png
+            )
+        )
     }
 
     suspend fun removeFavourite(code: String) {
-        favouritesDao.delete(FavouriteCountryEntity(code))
+        favouritesDao.deleteByCode(code)
     }
 }
