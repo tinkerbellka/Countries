@@ -45,7 +45,7 @@ fun CountryDetailScreen(
                 Text(it)
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { viewModel.load(code) }) {
+            Button(onClick = { viewModel.retry() }) {
                 Text("Повторить")
             }
         }

@@ -28,7 +28,10 @@ class CountryDetailViewModel @Inject constructor(
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    private var lastLoadedCode: String? = null
+
     fun load(code: String) {
+        lastLoadedCode = code
         viewModelScope.launch {
             isLoading = true
             error = false
@@ -44,5 +47,10 @@ class CountryDetailViewModel @Inject constructor(
                 isLoading = false
             }
         }
+    }
+
+    fun retry() {
+        val code = lastLoadedCode ?: return
+        load(code)
     }
 }

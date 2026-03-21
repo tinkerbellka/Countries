@@ -31,6 +31,8 @@ class CountriesViewModel @Inject constructor(
     private var favourites by mutableStateOf<Set<String>>(emptySet())
         private set
 
+    private var lastQuery: String = ""
+
     init {
         loadAllCountries()
         loadFavouriteCodes()
@@ -57,6 +59,7 @@ class CountriesViewModel @Inject constructor(
     }
 
     fun search(query: String) {
+        lastQuery = query
         if (query.isBlank()) {
             loadAllCountries()
             return
@@ -106,6 +109,10 @@ class CountriesViewModel @Inject constructor(
 
     fun isFavourite(code: String): Boolean {
         return favourites.contains(code)
+    }
+
+    fun retry() {
+        search(lastQuery)
     }
 
     private fun loadFavouriteCodes() {
