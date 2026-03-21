@@ -29,3 +29,7 @@ CountriesUiIntegrationTest: 3
 - "Repository + Room": запись/чтение избранного, отсутствие дубликатов, удаление из избранного
 - UI: список -> клик по элементу -> переход на детали нужного id
 - UI: ошибка -> нажимаю "Повторить" -> успешное состояние
+
+![Снимок экрана 2026-03-22 000431](https://github.com/user-attachments/assets/e8c1f01a-24b3-4cdf-9304-32e53779b193)
+![Снимок экрана 2026-03-22 001034](https://github.com/user-attachments/assets/3d90a449-aef9-45e0-b6a1-11258bd146b5)
+
