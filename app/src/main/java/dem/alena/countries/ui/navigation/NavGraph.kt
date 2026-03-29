@@ -36,8 +36,7 @@ fun NavGraph(
 
         composable("favourites") {
             FavouritesScreen(
-                state = countriesViewModel.favouritesState,
-                onEvent = countriesViewModel::onFavouritesEvent,
+                viewModel = countriesViewModel,
                 onCountryClick = { code ->
                     navController.navigate("detail/$code")
                 }

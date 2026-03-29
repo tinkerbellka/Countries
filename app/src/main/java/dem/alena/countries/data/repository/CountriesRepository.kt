@@ -6,12 +6,22 @@ import dem.alena.countries.data.model.Country
 import dem.alena.countries.data.model.Flags
 import dem.alena.countries.data.model.Name
 import dem.alena.countries.data.network.CountriesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class CountriesRepository @Inject constructor(
     private val api: CountriesApi,
     private val favouritesDao: FavouritesDao
 ) {
+
+    suspend fun fetchCountries(query: String): List<Country> {
+        return if (query.isBlank()) {
+            api.getAllCountries()
+        } else {
+            api.searchCountries(query)
+        }
+    }
 
     suspend fun getAllCountries(): List<Country> {
         return api.getAllCountries()
@@ -29,17 +39,20 @@ class CountriesRepository @Inject constructor(
         return favouritesDao.getAllCodes().toSet()
     }
 
+    fun observeFavouriteCodes(): Flow<Set<String>> {
+        return favouritesDao.observeAllCodes()
+            .map { it.toSet() }
+    }
+
     suspend fun getFavouriteCountries(): List<Country> {
         return favouritesDao.getAll().map { entity ->
-            Country(
-                code = entity.code,
-                name = Name(common = entity.nameCommon),
-                capital = entity.capital?.let { listOf(it) },
-                region = entity.region,
-                population = entity.population,
-                flags = Flags(png = entity.flagPng)
-            )
+            entity.toCountry()
         }
+    }
+
+    fun observeFavouriteCountries(): Flow<List<Country>> {
+        return favouritesDao.observeAll()
+            .map { entities -> entities.map { entity -> entity.toCountry() } }
     }
 
     suspend fun isFavourite(code: String): Boolean {
@@ -61,5 +74,16 @@ class CountriesRepository @Inject constructor(
 
     suspend fun removeFavourite(code: String) {
         favouritesDao.deleteByCode(code)
+    }
+
+    private fun FavouriteCountryEntity.toCountry(): Country {
+        return Country(
+            code = code,
+            name = Name(common = nameCommon),
+            capital = capital?.let(::listOf),
+            region = region,
+            population = population,
+            flags = Flags(png = flagPng)
+        )
     }
 }

@@ -1,18 +1,36 @@
 package dem.alena.countries.ui.screen.list
 
 import dem.alena.countries.data.model.Country
+import dem.alena.countries.data.preferences.CountriesSortOrder
 
-sealed class CountriesUiState {
+data class CountriesUiState(
+    val query: String = "",
+    val filterMode: CountriesFilterMode = CountriesFilterMode.ALL,
+    val sortOrder: CountriesSortOrder = CountriesSortOrder.NAME,
+    val favouritesCount: Int = 0,
+    val content: CountriesContentState = CountriesContentState.Loading
+)
 
-    object Loading : CountriesUiState()
+enum class CountriesFilterMode {
+    ALL,
+    FAVOURITES_ONLY
+}
 
-    object Empty : CountriesUiState()
+sealed interface CountriesContentState {
+    data object Loading : CountriesContentState
+    data object Empty : CountriesContentState
+    data class Error(val message: String) : CountriesContentState
+    data class Success(val countries: List<CountryListItem>) : CountriesContentState
+}
 
-    data class Error(
-        val message: String
-    ) : CountriesUiState()
+data class CountryListItem(
+    val country: Country,
+    val isFavourite: Boolean
+)
 
-    data class Success(
-        val countries: List<Country>
-    ) : CountriesUiState()
+sealed interface FavouritesUiState {
+    data object Loading : FavouritesUiState
+    data object Empty : FavouritesUiState
+    data class Error(val message: String) : FavouritesUiState
+    data class Success(val countries: List<CountryListItem>) : FavouritesUiState
 }

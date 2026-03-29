@@ -3,6 +3,7 @@ package dem.alena.countries.data.repository
 import dem.alena.countries.testutil.FakeCountriesApi
 import dem.alena.countries.testutil.FakeFavouritesDao
 import dem.alena.countries.testutil.testCountry
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -35,5 +36,14 @@ class CountriesRepositoryTest {
         assertEquals("Germany", mapped.name.common)
         assertTrue(mapped.capital?.isNotEmpty() == true)
     }
-}
 
+    @Test
+    fun observeFavouriteCodes_emitsUpdatedCodes() = runTest {
+        val repository = CountriesRepository(FakeCountriesApi(), FakeFavouritesDao())
+
+        repository.addFavourite(testCountry(code = "BRA"))
+
+        val codes = repository.observeFavouriteCodes().first()
+        assertEquals(setOf("BRA"), codes)
+    }
+}

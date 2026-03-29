@@ -6,7 +6,13 @@ import dem.alena.countries.data.model.Country
 import dem.alena.countries.data.model.Flags
 import dem.alena.countries.data.model.Name
 import dem.alena.countries.data.network.CountriesApi
+import dem.alena.countries.data.preferences.CountriesListSettings
+import dem.alena.countries.data.preferences.CountriesSettingsRepository
+import dem.alena.countries.data.preferences.CountriesSortOrder
 import java.util.ArrayDeque
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 
 fun testCountry(
     code: String = "USA",
@@ -77,19 +83,44 @@ open class FakeCountriesApi : CountriesApi {
 
 class FakeFavouritesDao : FavouritesDao {
     private val items = linkedMapOf<String, FavouriteCountryEntity>()
+    private val entitiesFlow = MutableStateFlow<List<FavouriteCountryEntity>>(emptyList())
 
-    override suspend fun getAllCodes(): List<String> = items.keys.toList()
+    override suspend fun getAllCodes(): List<String> = entitiesFlow.value.map { it.code }
 
-    override suspend fun getAll(): List<FavouriteCountryEntity> = items.values.toList()
+    override fun observeAllCodes(): Flow<List<String>> {
+        return entitiesFlow.map { entities -> entities.map(FavouriteCountryEntity::code) }
+    }
+
+    override suspend fun getAll(): List<FavouriteCountryEntity> = entitiesFlow.value
+
+    override fun observeAll(): Flow<List<FavouriteCountryEntity>> = entitiesFlow
 
     override suspend fun isFavourite(code: String): Boolean = items.containsKey(code)
 
     override suspend fun insert(entity: FavouriteCountryEntity) {
         items[entity.code] = entity
+        syncState()
     }
 
     override suspend fun deleteByCode(code: String) {
         items.remove(code)
+        syncState()
+    }
+
+    private fun syncState() {
+        entitiesFlow.value = items.values.toList()
+    }
+}
+
+class FakeCountriesSettingsRepository(
+    initialSettings: CountriesListSettings = CountriesListSettings()
+) : CountriesSettingsRepository {
+    private val settingsFlow = MutableStateFlow(initialSettings)
+
+    override val settings: Flow<CountriesListSettings> = settingsFlow
+
+    override suspend fun setSortOrder(sortOrder: CountriesSortOrder) {
+        settingsFlow.value = settingsFlow.value.copy(sortOrder = sortOrder)
     }
 }
 

@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dem.alena.countries.data.repository.CountriesRepository
 import dem.alena.countries.testutil.AndroidFakeCountriesApi
+import dem.alena.countries.testutil.AndroidFakeCountriesSettingsRepository
 import dem.alena.countries.testutil.AndroidFakeFavouritesDao
 import dem.alena.countries.testutil.androidTestCountry
 import dem.alena.countries.ui.screen.list.CountriesListScreen
@@ -31,7 +32,10 @@ class CountriesUiIntegrationTest {
         val api = AndroidFakeCountriesApi().apply {
             enqueueGetAllSuccess(listOf(androidTestCountry(code = "BRA", name = "Brazil")))
         }
-        val viewModel = CountriesViewModel(CountriesRepository(api, AndroidFakeFavouritesDao()))
+        val viewModel = CountriesViewModel(
+            CountriesRepository(api, AndroidFakeFavouritesDao()),
+            AndroidFakeCountriesSettingsRepository()
+        )
 
         composeRule.setContent {
             TestNavContent(viewModel = viewModel)
@@ -48,7 +52,10 @@ class CountriesUiIntegrationTest {
             enqueueGetAllError(IllegalStateException("network down"))
             enqueueGetAllSuccess(listOf(androidTestCountry(code = "CAN", name = "Canada")))
         }
-        val viewModel = CountriesViewModel(CountriesRepository(api, AndroidFakeFavouritesDao()))
+        val viewModel = CountriesViewModel(
+            CountriesRepository(api, AndroidFakeFavouritesDao()),
+            AndroidFakeCountriesSettingsRepository()
+        )
 
         composeRule.setContent {
             CountriesListScreen(
@@ -68,7 +75,10 @@ class CountriesUiIntegrationTest {
         val api = AndroidFakeCountriesApi().apply {
             enqueueGetAllSuccess(emptyList())
         }
-        val viewModel = CountriesViewModel(CountriesRepository(api, AndroidFakeFavouritesDao()))
+        val viewModel = CountriesViewModel(
+            CountriesRepository(api, AndroidFakeFavouritesDao()),
+            AndroidFakeCountriesSettingsRepository()
+        )
 
         composeRule.setContent {
             CountriesListScreen(
@@ -78,7 +88,8 @@ class CountriesUiIntegrationTest {
             )
         }
 
-        composeRule.onNodeWithText("Ничего не найдено").assertIsDisplayed()
+        composeRule.onNodeWithText("Ничего не найдено. Попробуйте другой запрос или фильтр.")
+            .assertIsDisplayed()
     }
 }
 
@@ -98,4 +109,3 @@ private fun TestNavContent(viewModel: CountriesViewModel) {
         }
     }
 }
-
