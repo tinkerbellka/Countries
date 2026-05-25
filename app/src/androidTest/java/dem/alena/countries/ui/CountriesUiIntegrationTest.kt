@@ -11,9 +11,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dem.alena.countries.data.repository.CountriesRepository
+import dem.alena.countries.data.repository.PersonalDataRepository
+import dem.alena.countries.data.repository.ProfilesRepository
+import dem.alena.countries.testutil.AndroidEmptyCacheDao
+import dem.alena.countries.testutil.AndroidEmptyCollectionsDao
+import dem.alena.countries.testutil.AndroidEmptyNotesDao
+import dem.alena.countries.testutil.AndroidEmptyViewHistoryDao
 import dem.alena.countries.testutil.AndroidFakeCountriesApi
 import dem.alena.countries.testutil.AndroidFakeCountriesSettingsRepository
 import dem.alena.countries.testutil.AndroidFakeFavouritesDao
+import dem.alena.countries.testutil.AndroidStubProfileDao
 import dem.alena.countries.testutil.androidTestCountry
 import dem.alena.countries.ui.screen.list.CountriesListScreen
 import dem.alena.countries.ui.screen.list.CountriesViewModel
@@ -27,15 +34,32 @@ class CountriesUiIntegrationTest {
     @get:Rule
     val composeRule = createComposeRule()
 
+    private fun createViewModel(api: AndroidFakeCountriesApi): CountriesViewModel {
+        val settings = AndroidFakeCountriesSettingsRepository()
+        val repository = CountriesRepository(
+            api,
+            AndroidFakeFavouritesDao(),
+            AndroidEmptyCacheDao(),
+            settings
+        )
+        return CountriesViewModel(
+            repository,
+            settings,
+            ProfilesRepository(AndroidStubProfileDao(), settings),
+            PersonalDataRepository(
+                AndroidEmptyViewHistoryDao(),
+                AndroidEmptyNotesDao(),
+                AndroidEmptyCollectionsDao()
+            )
+        )
+    }
+
     @Test
     fun listClick_navigatesToDetailWithCorrectId() {
         val api = AndroidFakeCountriesApi().apply {
             enqueueGetAllSuccess(listOf(androidTestCountry(code = "BRA", name = "Brazil")))
         }
-        val viewModel = CountriesViewModel(
-            CountriesRepository(api, AndroidFakeFavouritesDao()),
-            AndroidFakeCountriesSettingsRepository()
-        )
+        val viewModel = createViewModel(api)
 
         composeRule.setContent {
             TestNavContent(viewModel = viewModel)
@@ -52,10 +76,7 @@ class CountriesUiIntegrationTest {
             enqueueGetAllError(IllegalStateException("network down"))
             enqueueGetAllSuccess(listOf(androidTestCountry(code = "CAN", name = "Canada")))
         }
-        val viewModel = CountriesViewModel(
-            CountriesRepository(api, AndroidFakeFavouritesDao()),
-            AndroidFakeCountriesSettingsRepository()
-        )
+        val viewModel = createViewModel(api)
 
         composeRule.setContent {
             CountriesListScreen(
@@ -75,10 +96,7 @@ class CountriesUiIntegrationTest {
         val api = AndroidFakeCountriesApi().apply {
             enqueueGetAllSuccess(emptyList())
         }
-        val viewModel = CountriesViewModel(
-            CountriesRepository(api, AndroidFakeFavouritesDao()),
-            AndroidFakeCountriesSettingsRepository()
-        )
+        val viewModel = createViewModel(api)
 
         composeRule.setContent {
             CountriesListScreen(

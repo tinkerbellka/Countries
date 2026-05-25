@@ -14,9 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,9 +47,26 @@ fun CountriesListScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Страны")
+            Column {
+                Text("Страны", style = MaterialTheme.typography.titleLarge)
+                if (state.activeProfileName.isNotEmpty()) {
+                    Text("Профиль: ${state.activeProfileName}")
+                }
+            }
             Button(onClick = onFavouritesClick) {
-                Text("Избранное")
+                Text("Избранное (${state.favouritesCount})")
+            }
+        }
+
+        state.offlineBanner?.let { banner ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(banner, modifier = Modifier.padding(12.dp))
             }
         }
 
@@ -75,7 +94,12 @@ fun CountriesListScreen(
             FilterChip(
                 selected = state.filterMode == CountriesFilterMode.FAVOURITES_ONLY,
                 onClick = { viewModel.onFilterModeChange(CountriesFilterMode.FAVOURITES_ONLY) },
-                label = { Text("Только избранное") }
+                label = { Text("Избранное") }
+            )
+            FilterChip(
+                selected = state.filterMode == CountriesFilterMode.WITH_NOTES_ONLY,
+                onClick = { viewModel.onFilterModeChange(CountriesFilterMode.WITH_NOTES_ONLY) },
+                label = { Text("С заметками") }
             )
         }
 
@@ -99,18 +123,11 @@ fun CountriesListScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = viewModel::onRefresh,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Обновить")
+        Button(onClick = viewModel::onRefresh, modifier = Modifier.fillMaxWidth()) {
+            Text("Обновить из сети")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Text("Избранных стран: ${state.favouritesCount}")
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Box(
             modifier = Modifier
@@ -119,10 +136,7 @@ fun CountriesListScreen(
         ) {
             when (val content = state.content) {
                 CountriesContentState.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
@@ -134,19 +148,12 @@ fun CountriesListScreen(
                     ) {
                         Text(content.message)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = viewModel::retry) {
-                            Text("Повторить")
-                        }
+                        Button(onClick = viewModel::retry) { Text("Повторить") }
                     }
                 }
 
                 CountriesContentState.Empty -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
-                        Text("Ничего не найдено. Попробуйте другой запрос или фильтр.")
-                    }
+                    Text("Ничего не найдено. Попробуйте другой запрос или фильтр.")
                 }
 
                 is CountriesContentState.Success -> {
@@ -188,6 +195,9 @@ fun CountryCardRow(
                 Text(item.country.name.common)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text("${item.country.region} • ${item.country.population}")
+                if (item.hasNote) {
+                    Text("есть заметка", style = MaterialTheme.typography.labelSmall)
+                }
             }
             IconButton(onClick = onFavouriteClick) {
                 Text(if (item.isFavourite) "★" else "☆")

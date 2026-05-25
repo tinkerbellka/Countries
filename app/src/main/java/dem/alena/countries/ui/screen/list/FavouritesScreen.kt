@@ -3,6 +3,8 @@ package dem.alena.countries.ui.screen.list
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -22,7 +24,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FavouritesScreen(
     viewModel: CountriesViewModel,
-    onCountryClick: (String) -> Unit
+    onCountryClick: (String) -> Unit,
+    onBack: () -> Unit = {}
 ) {
     val state by viewModel.favouritesUiState.collectAsState()
 
@@ -31,7 +34,13 @@ fun FavouritesScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Избранное")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Избранное")
+            Button(onClick = onBack) { Text("Назад") }
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         when (val currentState = state) {

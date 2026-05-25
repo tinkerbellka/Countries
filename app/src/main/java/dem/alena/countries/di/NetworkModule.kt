@@ -6,9 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dem.alena.countries.data.local.FavouritesDao
 import dem.alena.countries.data.network.CountriesApi
-import dem.alena.countries.data.repository.CountriesRepository
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -46,12 +44,5 @@ object NetworkModule {
     fun provideCountriesApi(
         retrofit: Retrofit
     ): CountriesApi = retrofit.create(CountriesApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideCountriesRepository(
-        api: CountriesApi,
-        favouritesDao: FavouritesDao
-    ): CountriesRepository = CountriesRepository(api, favouritesDao)
 }
 
