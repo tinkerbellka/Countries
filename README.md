@@ -91,3 +91,20 @@ CountryDetailViewModelTest - загрузка и retry.
 Инструментальные (androidTest):
 RepositoryRoomIntegrationTest - Room: избранное, история, запись в кэш;
 CountriesUiIntegrationTest - список, переход на деталку, retry после ошибки, пустой список.
+
+
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/c5e20799-dbad-472f-8639-f48dcfb61dc8" />
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/5a5eaf6b-0c12-4bb6-b99f-78ae51b2d6f9" />
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/94b6a798-540b-4405-8c7f-4507aad3c306" />
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/1057c6bd-cb05-4caf-96bf-7e7705cbf1b6" />
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/84a9e0e6-2b2f-4c52-af19-95733cd960f6" />
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/6e8ae2dd-2986-47e6-bb13-ed5a5c0f67b7" />
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/a03babf7-831a-40be-9a91-a09fc9016780" />
+<img width="1200" height="1920" alt="image" src="https://github.com/user-attachments/assets/4b1f3c8d-8707-4720-af04-a0fa9356003b" />
+
+
+
+
+
+
+
